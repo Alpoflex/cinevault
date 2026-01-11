@@ -2,15 +2,11 @@ import axios from 'axios';
 import { Movie, MovieDetails, Genre, ApiResponse } from '@/types';
 
 // TMDB API - Free to use, just need API key
-const API_KEY = process.env.TMDB_API_KEY || '';
-const BASE_URL = 'https://api.themoviedb.org/3';
 export const IMAGE_BASE = 'https://image.tmdb.org/t/p';
 
 const api = axios.create({
-    baseURL: BASE_URL,
-    params: {
-        api_key: API_KEY,
-    },
+    baseURL: '/api/tmdb',
+    // API key is injected by the proxy route
 });
 
 export const tmdbApi = {
