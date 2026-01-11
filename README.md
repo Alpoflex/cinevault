@@ -1,38 +1,37 @@
 # CineVault 🎬
 
-**Your gateway to cinematic discovery.**
+Discover movies the way they were meant to be experienced.
 
-A modern movie database explorer powered by TMDB API, featuring trending films, detailed information, and a beautiful cinematic design.
+Built this over a weekend because I got tired of Netflix's algorithm. Sometimes you just want to browse movies by genre without being force-fed recommendations.
 
-## Features
+## What it does
 
-*   **Real-Time Movie Data**: Live data from The Movie Database (TMDB)
-*   **Trending & Popular**: See what's hot right now
-*   **Top Rated**: Discover critically acclaimed films
-*   **Search**: Find any movie instantly
-*   **Movie Details**: Cast, runtime, ratings, trailers
-*   **Cinematic Design**: Netflix-inspired red & gold theme
-*   **Smooth Animations**: Framer Motion powered transitions
+- **Browse 500k+ movies** from TMDB
+- **Search** that actually works
+- **Filter by genre** - Action, Comedy, Horror, you name it
+- **Movie details** with cast, trailers, ratings
+- Clean UI inspired by streaming platforms but better
 
-## Technologies
+## Tech
 
-*   **Next.js 16** (App Router)
-*   **TypeScript**
-*   **Tailwind CSS v4**
-*   **Axios** (API Calls)
-*   **Framer Motion** (Animations)
-*   **TMDB API** (Movie Data)
-*   **Lucide React** (Icons)
+Next.js 15 • TypeScript • Tailwind • TMDB API • Framer Motion
 
-## Usage
+## Setup
+
+Get a free API key from [TMDB](https://www.themoviedb.org/settings/api):
 
 ```bash
 npm install
+echo "TMDB_API_KEY=your_key_here" > .env.local
 npm run dev
 ```
 
-Open `http://localhost:3000` and explore movies!
+That's it. Open localhost:3000 and browse.
+
+## Why I built this
+
+Streaming services hide too much content. TMDB has everything but their website is... not great. Wanted something simple and fast.
 
 ---
 
-*A showcase project demonstrating API integration, modern design, and smooth UX.*
+*Personal project. Not affiliated with TMDB.*

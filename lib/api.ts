@@ -2,7 +2,7 @@ import axios from 'axios';
 import { Movie, MovieDetails, Genre, ApiResponse } from '@/types';
 
 // TMDB API - Free to use, just need API key
-const API_KEY = '8265bd1679663a7ea12ac168da84d2e8'; // Demo key
+const API_KEY = process.env.TMDB_API_KEY || '';
 const BASE_URL = 'https://api.themoviedb.org/3';
 export const IMAGE_BASE = 'https://image.tmdb.org/t/p';
 
