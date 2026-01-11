@@ -36,10 +36,12 @@ export default function MovieCard({ movie }: MovieCardProps) {
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                             <Star size={16} className="text-yellow-400" fill="currentColor" />
-                            <span className="text-yellow-400 font-semibold">{formatRating(movie.vote_average)}</span>
+                            <span className="text-yellow-400 font-semibold">
+                                {movie.vote_average ? formatRating(movie.vote_average) : 'N/A'}
+                            </span>
                         </div>
                         <span className="text-gray-300 text-sm">
-                            {new Date(movie.release_date).getFullYear()}
+                            {movie.release_date ? new Date(movie.release_date).getFullYear() : 'TBA'}
                         </span>
                     </div>
                 </div>
@@ -58,7 +60,9 @@ export default function MovieCard({ movie }: MovieCardProps) {
                 </button>
 
                 <div className="absolute top-3 left-3 rating-badge px-2 py-1 rounded z-20">
-                    <span className="text-yellow-400 font-bold text-sm">{formatRating(movie.vote_average)}</span>
+                    <span className="text-yellow-400 font-bold text-sm">
+                        {movie.vote_average ? formatRating(movie.vote_average) : 'N/A'}
+                    </span>
                 </div>
             </motion.div>
         </Link>
