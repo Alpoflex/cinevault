@@ -11,11 +11,21 @@ export default function Home() {
   const [trending, setTrending] = useState<Movie[]>([]);
   const [popular, setPopular] = useState<Movie[]>([]);
   const [topRated, setTopRated] = useState<Movie[]>([]);
+  const [searchResults, setSearchResults] = useState<Movie[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadMovies();
   }, []);
+
+  useEffect(() => {
+    if (searchQuery.length > 2) {
+      searchMovies();
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
 
   const loadMovies = async () => {
     setLoading(true);
@@ -32,6 +42,15 @@ export default function Home() {
       console.error('Error loading movies:', error);
     }
     setLoading(false);
+  };
+
+  const searchMovies = async () => {
+    try {
+      const results = await tmdbApi.searchMovies(searchQuery);
+      setSearchResults(results.slice(0, 12));
+    } catch (error) {
+      console.error('Error searching movies:', error);
+    }
   };
 
   return (
@@ -56,6 +75,8 @@ export default function Home() {
               <input
                 type="text"
                 placeholder="Search movies..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-6 py-4 pl-14 bg-white/10 backdrop-blur-md border-2 border-white/20 rounded-full text-white placeholder-gray-400 focus:outline-none focus:border-primary transition-all"
               />
               <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={24} />
@@ -65,6 +86,20 @@ export default function Home() {
       </section>
 
       <div className="max-w-7xl mx-auto px-6">
+        {/* Search Results */}
+        {searchResults.length > 0 && (
+          <section className="my-16">
+            <div className="flex items-center gap-3 mb-6">
+              <Search size={28} className="text-primary" />
+              <h2 className="text-3xl font-bold text-white">Search Results</h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {searchResults.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} />
+              ))}
+            </div>
+          </section>
+        )}
         {/* Trending Section */}
         <section className="my-16">
           <div className="flex items-center gap-3 mb-6">
