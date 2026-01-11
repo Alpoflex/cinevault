@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { use, useEffect, useState } from 'react';
 import { tmdbApi, getImageUrl, getYoutubeUrl } from '@/lib/api';
 import { MovieDetails } from '@/types';
 import { formatRuntime, formatRating } from '@/lib/utils';
@@ -8,17 +8,18 @@ import { Star, Clock, Calendar, Play, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 
-export default function MoviePage({ params }: { params: { id: string } }) {
+export default function MoviePage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
     const [movie, setMovie] = useState<MovieDetails | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         loadMovie();
-    }, [params.id]);
+    }, [id]);
 
     const loadMovie = async () => {
         try {
-            const data = await tmdbApi.getMovieDetails(parseInt(params.id));
+            const data = await tmdbApi.getMovieDetails(parseInt(id));
             setMovie(data);
         } catch (error) {
             console.error('Error loading movie:', error);
