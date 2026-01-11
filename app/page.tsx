@@ -1,11 +1,270 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { tmdbApi } from '@/lib/api';
-import { Movie } from '@/types';
+import { tmdbApi, getImageUrl } from '@/lib/api';
+import { Movie, Genre } from '@/types';
 import MovieCard from '@/components/MovieCard';
-import { Film, TrendingUp, Award, Search } from 'lucide-react';
+import { Film, TrendingUp, Award, Search, Play, Info } from 'lucide-react';
 import { motion } from 'framer-motion';
+import Link from 'next/link';
+
+export default function Home() {
+  const [trending, setTrending] = useState<Movie[]>([]);
+  const [popular, setPopular] = useState<Movie[]>([]);
+  const [topRated, setTopRated] = useState<Movie[]>([]);
+  const [genres, setGenres] = useState<Genre[]>([]);
+  const [selectedGenre, setSelectedGenre] = useState<number | null>(null);
+  const [genreMovies, setGenreMovies] = useState<Movie[]>([]);
+  const [searchResults, setSearchResults] = useState<Movie[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [featuredMovie, setFeaturedMovie] = useState<Movie | null>(null);
+
+  useEffect(() => {
+    loadMovies();
+    loadGenres();
+  }, []);
+
+  useEffect(() => {
+    if (searchQuery.length > 2) {
+      searchMovies();
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (selectedGenre) {
+      loadGenreMovies();
+    }
+  }, [selectedGenre]);
+
+  const loadMovies = async () => {
+    setLoading(true);
+    try {
+      const [trendingData, popularData, topRatedData] = await Promise.all([
+        tmdbApi.getTrending(),
+        tmdbApi.getPopular(),
+        tmdbApi.getTopRated(),
+      ]);
+      setTrending(trendingData.slice(0, 10));
+      setPopular(popularData.results.slice(0, 18));
+      setTopRated(topRatedData.slice(0, 10));
+      setFeaturedMovie(popularData.results[0]);
+    } catch (error) {
+      console.error('Error loading movies:', error);
+    }
+    setLoading(false);
+  };
+
+  const loadGenres = async () => {
+    try {
+      const data = await tmdbApi.getGenres();
+      setGenres(data.slice(0, 10));
+    } catch (error) {
+      console.error('Error loading genres:', error);
+    }
+  };
+
+  const loadGenreMovies = async () => {
+    if (!selectedGenre) return;
+    try {
+      const data = await tmdbApi.discoverByGenre(selectedGenre);
+      setGenreMovies(data.slice(0, 12));
+    } catch (error) {
+      console.error('Error loading genre movies:', error);
+    }
+  };
+
+  const searchMovies = async () => {
+    try {
+      const results = await tmdbApi.searchMovies(searchQuery);
+      setSearchResults(results.slice(0, 12));
+    } catch (error) {
+      console.error('Error searching movies:', error);
+    }
+  };
+
+  return (
+    <main className="min-h-screen">
+      {/* Featured Hero */}
+      {featuredMovie && (
+        <section className="relative h-[90vh] mb-8">
+          <div
+            className="absolute inset-0 bg-cover bg-center"
+            style={{
+              backgroundImage: `url(${getImageUrl(featuredMovie.backdrop_path, 'original')})`,
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/70 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-background via-transparent to-background/80" />
+
+          <div className="relative h-full max-w-7xl mx-auto px-6 flex flex-col justify-end pb-24">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="max-w-2xl"
+            >
+              <div className="inline-block px-4 py-1.5 bg-primary rounded-full mb-4 text-sm font-bold">
+                FEATURED
+              </div>
+              <h1 className="text-6xl md:text-7xl font-black text-white mb-6 leading-tight">
+                {featuredMovie.title}
+              </h1>
+              <p className="text-xl text-gray-300 mb-8 line-clamp-3">
+                {featuredMovie.overview}
+              </p>
+              <div className="flex gap-4">
+                <Link
+                  href={`/movie/${featuredMovie.id}`}
+                  className="golden-btn px-8 py-4 rounded-lg flex items-center gap-3 text-lg"
+                >
+                  <Play size={24} fill="currentColor" />
+                  Watch Now
+                </Link>
+                <Link
+                  href={`/movie/${featuredMovie.id}`}
+                  className="px-8 py-4 bg-white/10 backdrop-blur-md rounded-lg flex items-center gap-3 text-lg text-white hover:bg-white/20 transition-all border border-white/20"
+                >
+                  <Info size={24} />
+                  More Info
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* Search Bar */}
+            <div className="absolute top-8 right-6 max-w-md w-full">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search movies..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full px-5 py-3 pl-12 bg-black/60 backdrop-blur-md border-2 border-white/20 rounded-full text-white placeholder-gray-400 focus:outline-none focus:border-primary transition-all"
+                />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      <div className="max-w-7xl mx-auto px-6 pb-20">
+        {/* Search Results */}
+        {searchResults.length > 0 && (
+          <section className="mb-16">
+            <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-3">
+              <Search size={32} className="text-primary" />
+              Search Results
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              {searchResults.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Genre Filter */}
+        <section className="mb-12">
+          <h3 className="text-2xl font-bold text-white mb-6">Browse by Genre</h3>
+          <div className="flex flex-wrap gap-3">
+            {genres.map((genre) => (
+              <button
+                key={genre.id}
+                onClick={() => setSelectedGenre(selectedGenre === genre.id ? null : genre.id)}
+                className={`px-6 py-3 rounded-full font-semibold transition-all ${selectedGenre === genre.id
+                    ? 'bg-primary text-white scale-110'
+                    : 'bg-white/10 text-white hover:bg-white/20 border border-white/20'
+                  }`}
+              >
+                {genre.name}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Genre Movies */}
+        {selectedGenre && genreMovies.length > 0 && (
+          <section className="mb-16">
+            <h2 className="text-3xl font-bold text-white mb-8">
+              {genres.find(g => g.id === selectedGenre)?.name} Movies
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              {genreMovies.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Trending */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-3">
+            <TrendingUp size={32} className="text-primary" />
+            Trending This Week
+          </h2>
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-10 gap-4">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="skeleton h-[300px] rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-10 gap-4">
+              {trending.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Popular */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-3">
+            <Film size={32} className="text-secondary" />
+            Popular on CineVault
+          </h2>
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              {[...Array(18)].map((_, i) => (
+                <div key={i} className="skeleton h-[300px] rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+              {popular.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Top Rated */}
+        <section className="mb-16">
+          <h2 className="text-3xl font-bold text-white mb-8 flex items-center gap-3">
+            <Award size={32} className="text-secondary" />
+            Top Rated All Time
+          </h2>
+          {loading ? (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-10 gap-4">
+              {[...Array(10)].map((_, i) => (
+                <div key={i} className="skeleton h-[300px] rounded-lg" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 xl:grid-cols-10 gap-4">
+              {topRated.map((movie) => (
+                <MovieCard key={movie.id} movie={movie} />
+              ))}
+            </div>
+          )}
+        </section>
+      </div>
+    </main>
+  );
+}
+
 
 export default function Home() {
   const [trending, setTrending] = useState<Movie[]>([]);
