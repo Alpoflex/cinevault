@@ -23,9 +23,10 @@ export default function MovieCard({ movie }: MovieCardProps) {
                 className="movie-card rounded-lg overflow-hidden cursor-pointer relative group"
             >
                 <img
-                    src={getImageUrl(movie.poster_path)}
+                    src={getImageUrl(movie.poster_path, 'original')}
                     alt={movie.title}
-                    className="w-full h-[450px] object-cover"
+                    className="w-full h-[450px] object-cover transition-all duration-400"
+                    loading="lazy"
                 />
 
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10" />
