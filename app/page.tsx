@@ -5,6 +5,7 @@ import { tmdbApi } from '@/lib/api';
 import { Movie } from '@/types';
 import MovieCard from '@/components/MovieCard';
 import { Film, TrendingUp, Award, Search } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function Home() {
   const [trending, setTrending] = useState<Movie[]>([]);
